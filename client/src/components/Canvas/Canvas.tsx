@@ -1,11 +1,11 @@
-import React from "react"
+import React from 'react'
 
 const Canvas = () => {
-    return(
+    return (
         <div>
             <canvas></canvas>
         </div>
     )
 }
 
-export default Canvas;
+export default Canvas
