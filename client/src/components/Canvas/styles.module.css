@@ -1,0 +1,7 @@
+.canvas {
+    width: 90%;
+    height: 90%;
+    background-color: #f6faf9;
+    border: 2px solid #b9b3b3;
+    border-radius: 12px;
+}
