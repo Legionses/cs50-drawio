@@ -58,7 +58,10 @@ function App() {
 
     useEffect(() => {
         if (lastMessage?.data) {
-            handleMessages(JSON.parse(lastMessage.data))
+            try {
+                const data = JSON.parse(lastMessage.data)
+                handleMessages(data)
+            } catch (e) {}
         }
     }, [lastMessage])
 

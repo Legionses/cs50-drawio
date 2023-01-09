@@ -51,7 +51,17 @@ const handleActionMessages = (userId, message) => {
 wsServer.on('connection', (connection) => {
     const userId = uuidv4()
     clients[userId] = { connection, color: 'rgba(14, 255, 255, 1)' }
+    console.log('CONNECTED:', userId)
 
+    connection.isAlive = true
+    connection.on('pong', () => {
+        connection.isAlive = true
+    })
+
+    connection.on('close', () => {
+        console.log('CONNECTION CLOSED:', userId)
+        delete clients[userId]
+    })
     //connection is up, let's add a simple simple event
     connection.on('message', (message) => {
         //log the received message and send it back to the client
@@ -62,22 +72,33 @@ wsServer.on('connection', (connection) => {
         }
     })
 
-    //send immediatly a feedback to the incoming connection
+    //send immediately a starting data
     connection.send(
         JSON.stringify({
             type: 'INITIALISE',
             data: {
                 userId,
-                // @ts-ignore
-                users: Object.entries(clients).map(([userId, { connection, ...client }]) => ({
-                    userId,
-                    ...client,
-                })),
+                users: Object.entries(clients).map(
+                    // @ts-ignore
+                    ([userId, { connection, ...client }]) => ({
+                        userId,
+                        ...client,
+                    })
+                ),
                 canvas: lines,
             },
         })
     )
 })
+
+setInterval(() => {
+    wsServer.clients.forEach((ws) => {
+        if (!ws.isAlive) return ws.terminate()
+
+        ws.isAlive = false
+        ws.ping()
+    })
+}, 10000)
 
 server.listen(PORT, () => {
     console.log(`Server listening on ${PORT}`)
