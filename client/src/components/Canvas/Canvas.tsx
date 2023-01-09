@@ -26,8 +26,10 @@ const Canvas = (
         canvasRef.current.width = canvasRef.current.clientWidth
         canvasRef.current.height = canvasRef.current.clientHeight
         const mouseUp = () => {
-            if (isDrawing.current) isDrawing.current = false
-            saveLine(lines.current[lines.current.length - 1])
+            if (isDrawing.current) {
+                isDrawing.current = false
+                saveLine(lines.current[lines.current.length - 1])
+            }
         }
 
         document.addEventListener('mouseup', mouseUp)

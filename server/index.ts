@@ -31,7 +31,8 @@ const handleActionMessages = (userId, message) => {
         case SOCKET_ACTIONS.SAVE_LINE: {
             console.log('clients:', Object.keys(clients))
             if (data.line) lines.push(data.line)
-            Object.entries(clients).forEach(([id, connection]) => {
+            // @ts-ignore
+            Object.entries(clients).forEach(([id, { connection }]) => {
                 if (id !== userId) {
                     // @ts-ignore
                     connection.send(
@@ -49,7 +50,7 @@ const handleActionMessages = (userId, message) => {
 }
 wsServer.on('connection', (connection) => {
     const userId = uuidv4()
-    clients[userId] = connection
+    clients[userId] = { connection, color: 'rgba(14, 255, 255, 1)' }
 
     //connection is up, let's add a simple simple event
     connection.on('message', (message) => {
@@ -63,7 +64,18 @@ wsServer.on('connection', (connection) => {
 
     //send immediatly a feedback to the incoming connection
     connection.send(
-        JSON.stringify({ text: 'Hi there, I am a WebSocket server' })
+        JSON.stringify({
+            type: 'INITIALISE',
+            data: {
+                userId,
+                // @ts-ignore
+                users: Object.entries(clients).map(([userId, { connection, ...client }]) => ({
+                    userId,
+                    ...client,
+                })),
+                canvas: lines,
+            },
+        })
     )
 })
 

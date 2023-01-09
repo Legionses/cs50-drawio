@@ -1,12 +1,13 @@
-import React, { Ref, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import useWebSocket from 'react-use-websocket'
 import './styles/App.css'
 import Canvas from './components/Canvas'
 import Header from './components/Header'
-import { drawLine } from './utils/canvas'
+import { drawLine, redrawCanvas } from './utils/canvas'
 import { SOCKET_ACTIONS } from './utils/constants'
 
 function App() {
+    const [users, setUsers] = useState([])
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     const { sendMessage, lastMessage, readyState } = useWebSocket(
@@ -45,11 +46,17 @@ function App() {
                 }
                 break
             }
+            case 'INITIALISE': {
+                console.log(data)
+                setUsers(data.users)
+                if (canvasRef.current)
+                    redrawCanvas(data.canvas, canvasRef.current)
+                break
+            }
         }
     }
 
     useEffect(() => {
-        console.log('lastMessage', lastMessage)
         if (lastMessage?.data) {
             handleMessages(JSON.parse(lastMessage.data))
         }
@@ -57,7 +64,7 @@ function App() {
 
     return (
         <div className="App">
-            <Header />
+            <Header users={users} />
             <section className="App-body">
                 <Canvas saveLine={saveLine} ref={canvasRef} />
             </section>

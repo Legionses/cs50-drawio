@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Header = () => {
+const Header = ({ users: [] = [] }) => {
     return <header className="App-header"></header>
 }
 

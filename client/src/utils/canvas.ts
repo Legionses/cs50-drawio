@@ -15,3 +15,12 @@ export const drawLine = (points: Point[], canvas: HTMLCanvasElement) => {
         ctx.stroke()
     }
 }
+
+export const redrawCanvas = (lines: [Point[]], canvas: HTMLCanvasElement) => {
+    lines.forEach((points) => {
+        for (let i = 1; i < points.length; i++) {
+            drawLine(points, canvas)
+        }
+    })
+    console.log('Canvas redraw.')
+}
