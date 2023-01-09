@@ -1,12 +1,7 @@
-import React, { MouseEventHandler, useEffect, useRef } from 'react'
+import React, { MouseEventHandler, useEffect, useRef, forwardRef } from 'react'
 import styles from './styles.module.css'
-
-interface Line {
-    x: number
-    y: number
-    size: number
-    color: string
-}
+import { Point } from '../../models/Point.model'
+import { drawLine } from '../../utils/canvas'
 
 const getMousePos = (
     canvas: HTMLCanvasElement,
@@ -18,17 +13,21 @@ const getMousePos = (
         y: evt.clientY - rect.top,
     }
 }
-const Canvas = () => {
-    const lines = useRef<Line[][]>([])
-    const canvas = useRef<HTMLCanvasElement>(null)
+const Canvas = (
+    { saveLine = (line: Point[]) => {} }: any,
+    // @ts-ignore
+    canvasRef
+) => {
+    const lines = useRef<Point[][]>([])
     const isDrawing = useRef(false)
 
     useEffect(() => {
-        if (!canvas.current) return
-        canvas.current.width = canvas.current.clientWidth
-        canvas.current.height = canvas.current.clientHeight
+        if (!canvasRef || !canvasRef.current) return
+        canvasRef.current.width = canvasRef.current.clientWidth
+        canvasRef.current.height = canvasRef.current.clientHeight
         const mouseUp = () => {
             if (isDrawing.current) isDrawing.current = false
+            saveLine(lines.current[lines.current.length - 1])
         }
 
         document.addEventListener('mouseup', mouseUp)
@@ -57,34 +56,16 @@ const Canvas = () => {
         lines.current[lines.current.length - 1].push(line)
     }
 
-    const drawLine = (
-        lineStart: Line,
-        lineEnd: Line,
-        canvas: HTMLCanvasElement
-    ) => {
-        // @ts-ignore
-        const ctx: CanvasRenderingContext2D = canvas.getContext('2d')
-        const { x, y, size, color } = lineEnd
-        ctx.beginPath()
-        ctx.moveTo(lineStart.x, lineStart.y)
-        ctx.lineWidth = size
-        ctx.lineCap = 'round'
-        ctx.strokeStyle = color
-        ctx.lineTo(x, y)
-        ctx.stroke()
-    }
-
     const load = () => {
         const savedCanvas = localStorage.getItem('savedCanvas')
         // @ts-ignore
-        console.log(savedCanvas, JSON.parse(savedCanvas), canvas.current)
+        console.log(JSON.parse(savedCanvas), canvasRef.current)
         if (savedCanvas) {
             lines.current = JSON.parse(savedCanvas)
 
             lines.current.forEach((points) => {
                 for (let i = 1; i < points.length; i++) {
-                    if (canvas.current)
-                        drawLine(points[i - 1], points[i], canvas.current)
+                    if (canvasRef.current) drawLine(points, canvasRef.current)
                 }
             })
             console.log('Canvas loaded.')
@@ -107,11 +88,11 @@ const Canvas = () => {
     }, [])
 
     const mouseDown: MouseEventHandler<HTMLCanvasElement> = (evt) => {
-        if (!canvas.current) return
+        if (!canvasRef.current) return
         isDrawing.current = true
         // @ts-ignore
-        const ctx: CanvasRenderingContext2D = canvas.current.getContext('2d')
-        const currentPosition = getMousePos(canvas.current, evt)
+        const ctx: CanvasRenderingContext2D = canvasRef.current.getContext('2d')
+        const currentPosition = getMousePos(canvasRef.current, evt)
         ctx.moveTo(currentPosition.x, currentPosition.y)
         ctx.beginPath()
         ctx.lineWidth = 5
@@ -126,10 +107,10 @@ const Canvas = () => {
     }
 
     const mouseMove: MouseEventHandler<HTMLCanvasElement> = (evt) => {
-        if (!isDrawing.current || !canvas.current) return
-        const currentPosition = getMousePos(canvas.current, evt)
+        if (!isDrawing.current || !canvasRef.current) return
+        const currentPosition = getMousePos(canvasRef.current, evt)
         // @ts-ignore
-        const ctx: CanvasRenderingContext2D = canvas.current.getContext('2d')
+        const ctx: CanvasRenderingContext2D = canvasRef.current.getContext('2d')
         ctx.lineTo(currentPosition.x, currentPosition.y)
         ctx.stroke()
         storeLine(
@@ -142,7 +123,7 @@ const Canvas = () => {
 
     return (
         <canvas
-            ref={canvas}
+            ref={canvasRef}
             className={styles.canvas}
             onMouseDown={mouseDown}
             onMouseMove={mouseMove}
@@ -150,4 +131,4 @@ const Canvas = () => {
     )
 }
 
-export default Canvas
+export default forwardRef(Canvas)
