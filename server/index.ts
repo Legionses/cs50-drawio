@@ -3,7 +3,7 @@ const express = require('express')
 const http = require('http')
 const ws = require('ws')
 const { v4: uuidv4 } = require('uuid')
-const { SOCKET_ACTIONS } = require('./utils/constants.ts')
+const { SOCKET_ACTIONS, COLORS } = require('./utils/constants.ts')
 const { isJsonString } = require('./utils/data.ts')
 
 const PORT = process.env.PORT || 3001
@@ -23,6 +23,17 @@ const wsServer = new ws.Server({ server })
 const clients = {}
 const lines = []
 
+// @ts-ignore
+const sendMessageToAll = (data, { avoidUserId } = {}) => {
+    // @ts-ignore
+    Object.entries(clients).forEach(([id, { connection }]) => {
+        if (avoidUserId && avoidUserId === id) return
+
+        // @ts-ignore
+        connection.send(JSON.stringify(data))
+    })
+}
+
 const handleActionMessages = (userId, message) => {
     const { type, data } = message
 
@@ -31,26 +42,23 @@ const handleActionMessages = (userId, message) => {
         case SOCKET_ACTIONS.SAVE_LINE: {
             console.log('clients:', Object.keys(clients))
             if (data.line) lines.push(data.line)
-            // @ts-ignore
-            Object.entries(clients).forEach(([id, { connection }]) => {
-                if (id !== userId) {
-                    // @ts-ignore
-                    connection.send(
-                        JSON.stringify({
-                            userId,
-                            type,
-                            data,
-                        })
-                    )
-                }
-            })
+            sendMessageToAll(
+                {
+                    userId,
+                    type,
+                    data,
+                },
+                { avoidUserId: userId }
+            )
             break
         }
     }
 }
+
 wsServer.on('connection', (connection) => {
     const userId = uuidv4()
-    clients[userId] = { connection, color: 'rgba(14, 255, 255, 1)' }
+    const userData = { color: COLORS[Math.floor(Math.random() * 7)] }
+    clients[userId] = { connection, ...userData }
     console.log('CONNECTED:', userId)
 
     connection.isAlive = true
@@ -61,6 +69,8 @@ wsServer.on('connection', (connection) => {
     connection.on('close', () => {
         console.log('CONNECTION CLOSED:', userId)
         delete clients[userId]
+        // @ts-ignore
+        sendMessageToAll({ type: 'USER_LEFT', userId })
     })
     //connection is up, let's add a simple simple event
     connection.on('message', (message) => {
@@ -88,6 +98,19 @@ wsServer.on('connection', (connection) => {
                 canvas: lines,
             },
         })
+    )
+
+    sendMessageToAll(
+        {
+            type: 'USER_JOINED',
+            data: {
+                user: {
+                    userId,
+                    ...userData,
+                },
+            },
+        },
+        { avoidUserId: userId }
     )
 })
 

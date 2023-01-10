@@ -14,7 +14,7 @@ const getMousePos = (
     }
 }
 const Canvas = (
-    { saveLine = (line: Point[]) => {} }: any,
+    { saveLine = (line: Point[]) => {}, color }: any,
     // @ts-ignore
     canvasRef
 ) => {
@@ -99,13 +99,8 @@ const Canvas = (
         ctx.beginPath()
         ctx.lineWidth = 5
         ctx.lineCap = 'round'
-        ctx.strokeStyle = `rgba(14, 255, 255, 1)`
-        startLine(
-            currentPosition.x,
-            currentPosition.y,
-            5,
-            `rgba(14, 255, 255, 1)`
-        )
+        ctx.strokeStyle = color
+        startLine(currentPosition.x, currentPosition.y, 5, color)
     }
 
     const mouseMove: MouseEventHandler<HTMLCanvasElement> = (evt) => {
@@ -115,12 +110,7 @@ const Canvas = (
         const ctx: CanvasRenderingContext2D = canvasRef.current.getContext('2d')
         ctx.lineTo(currentPosition.x, currentPosition.y)
         ctx.stroke()
-        storeLine(
-            currentPosition.x,
-            currentPosition.y,
-            5,
-            `rgba(14, 255, 255, 1)`
-        )
+        storeLine(currentPosition.x, currentPosition.y, 5, color)
     }
 
     return (

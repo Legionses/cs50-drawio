@@ -8,6 +8,7 @@ import { SOCKET_ACTIONS } from './utils/constants'
 
 function App() {
     const [users, setUsers] = useState([])
+    const [color, setColor] = useState('')
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     const { sendMessage, lastMessage, readyState } = useWebSocket(
@@ -48,9 +49,28 @@ function App() {
             }
             case 'INITIALISE': {
                 console.log(data)
+                const user = data.users.find(
+                    (user: { userId: string }) => data.userId === user.userId
+                )
                 setUsers(data.users)
+                setColor(user.color)
                 if (canvasRef.current)
                     redrawCanvas(data.canvas, canvasRef.current)
+                break
+            }
+            case 'USER_JOINED': {
+                if (data.user) {
+                    // @ts-ignore
+                    setUsers([...users, data.user])
+                }
+                break
+            }
+            case 'USER_LEFT': {
+                setUsers(
+                    users.filter(
+                        (user: { userId: string }) => user.userId !== userId
+                    )
+                )
                 break
             }
         }
@@ -69,7 +89,7 @@ function App() {
         <div className="App">
             <Header users={users} />
             <section className="App-body">
-                <Canvas saveLine={saveLine} ref={canvasRef} />
+                <Canvas saveLine={saveLine} ref={canvasRef} color={color} />
             </section>
         </div>
     )
