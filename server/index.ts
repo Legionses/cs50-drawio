@@ -21,7 +21,7 @@ app.get('/api', (req, res) => {
 const wsServer = new ws.Server({ server })
 
 const clients = {}
-const lines = []
+let lines = []
 
 // @ts-ignore
 const sendMessageToAll = (data, { avoidUserId } = {}) => {
@@ -50,6 +50,11 @@ const handleActionMessages = (userId, message) => {
                 },
                 { avoidUserId: userId }
             )
+            break
+        }
+        case 'RESET_CANVAS': {
+            lines = []
+            sendMessageToAll({ type: 'RESET_CANVAS' })
             break
         }
     }

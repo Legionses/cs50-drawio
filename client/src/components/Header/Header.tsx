@@ -1,9 +1,20 @@
 import React from 'react'
 import './styles.css'
 
-const Header = ({ users = [] }) => {
+const Header = ({ users = [], sendMessage = (message: string) => {} }) => {
+    const resetCanvas = () => {
+        sendMessage(
+            JSON.stringify({
+                type: 'RESET_CANVAS',
+            })
+        )
+    }
+
     return (
         <header className="App-header">
+            <div>
+                <button className="resetBtn" onClick={resetCanvas} />
+            </div>
             <div className="users">
                 {users.map(({ userId, color, username }) => {
                     return (

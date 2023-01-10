@@ -11,14 +11,11 @@ function App() {
     const [color, setColor] = useState('')
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
-    const { sendMessage, lastMessage, readyState } = useWebSocket(
-        'ws://localhost:3001',
-        {
-            onOpen: () => {
-                console.log('WebSocket connection established.')
-            },
-        }
-    )
+    const { sendMessage, lastMessage } = useWebSocket('ws://localhost:3001', {
+        onOpen: () => {
+            console.log('WebSocket connection established.')
+        },
+    })
 
     const saveLine = (line: any) => {
         sendMessage(
@@ -73,6 +70,18 @@ function App() {
                 )
                 break
             }
+            case 'RESET_CANVAS': {
+                if (!canvasRef.current) return
+                const context = canvasRef.current.getContext('2d')
+                context!.clearRect(
+                    0,
+                    0,
+                    canvasRef.current.width,
+                    canvasRef.current.height
+                )
+
+                break
+            }
         }
     }
 
@@ -87,7 +96,7 @@ function App() {
 
     return (
         <div className="App">
-            <Header users={users} />
+            <Header users={users} sendMessage={sendMessage} />
             <section className="App-body">
                 <Canvas saveLine={saveLine} ref={canvasRef} color={color} />
             </section>
