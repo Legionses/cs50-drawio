@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import useWebSocket from 'react-use-websocket'
 import './styles/App.css'
 import Canvas from './components/Canvas'
@@ -8,7 +8,6 @@ import { SOCKET_ACTIONS } from './utils/constants'
 
 function App() {
     const [users, setUsers] = useState([])
-    const [user, setUser] = useState({ color: '' })
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     const { sendMessage, lastMessage } = useWebSocket('ws://localhost:3001', {
@@ -16,6 +15,12 @@ function App() {
             console.log('WebSocket connection established.')
         },
     })
+
+    const user = useMemo(() => {
+        if (!users.length) return { color: '' }
+        console.log(users)
+        return users.find((user: { isMe: boolean }) => user.isMe)
+    }, [users])
 
     const saveLine = (line: any) => {
         sendMessage(
@@ -30,7 +35,6 @@ function App() {
 
     // @ts-ignore
     const changeColor = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setUser({ ...user, color: e.target.value })
         sendMessage(
             JSON.stringify({
                 type: 'USER_UPDATE',
@@ -53,12 +57,13 @@ function App() {
                 break
             }
             case 'INITIALISE': {
-                console.log(data)
-                const user = data.users.find(
-                    (user: { userId: string }) => data.userId === user.userId
+                setUsers(
+                    data.users.map((user: { userId: any }) =>
+                        user.userId === data.userId
+                            ? { ...user, isMe: true }
+                            : user
+                    )
                 )
-                setUsers(data.users)
-                setUser(user)
                 if (canvasRef.current)
                     redrawCanvas(data.canvas, canvasRef.current)
                 break
@@ -116,7 +121,7 @@ function App() {
         <div className="App">
             <Header
                 users={users}
-                color={user.color}
+                color={user!.color}
                 sendMessage={sendMessage}
                 changeColor={changeColor}
             />
@@ -124,7 +129,7 @@ function App() {
                 <Canvas
                     saveLine={saveLine}
                     ref={canvasRef}
-                    color={user.color}
+                    color={user!.color}
                 />
             </section>
         </div>
