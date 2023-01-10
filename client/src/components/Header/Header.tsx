@@ -1,7 +1,18 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import './styles.css'
 
-const Header = ({ users = [], sendMessage = (message: string) => {} }) => {
+const Header = ({
+    users = [],
+    color = '',
+    sendMessage = (message: string) => {},
+    changeColor = (e: React.ChangeEvent<HTMLInputElement>) => {},
+}) => {
+    const colorRef = useRef<HTMLInputElement>(null)
+
+    useEffect(() => {
+        if (colorRef.current) colorRef.current.value = color
+    }, [color])
+
     const resetCanvas = () => {
         sendMessage(
             JSON.stringify({
@@ -12,8 +23,9 @@ const Header = ({ users = [], sendMessage = (message: string) => {} }) => {
 
     return (
         <header className="App-header">
-            <div>
+            <div className="instruments">
                 <button className="resetBtn" onClick={resetCanvas} />
+                <input ref={colorRef} type="color" onBlur={changeColor} />
             </div>
             <div className="users">
                 {users.map(({ userId, color, username }) => {

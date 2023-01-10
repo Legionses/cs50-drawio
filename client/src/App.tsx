@@ -8,7 +8,7 @@ import { SOCKET_ACTIONS } from './utils/constants'
 
 function App() {
     const [users, setUsers] = useState([])
-    const [color, setColor] = useState('')
+    const [user, setUser] = useState({ color: '' })
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     const { sendMessage, lastMessage } = useWebSocket('ws://localhost:3001', {
@@ -28,10 +28,18 @@ function App() {
         )
     }
 
-    useEffect(() => {
-        // @ts-ignore
-        window.send = sendMessage
-    }, [sendMessage])
+    // @ts-ignore
+    const changeColor = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setUser({ ...user, color: e.target.value })
+        sendMessage(
+            JSON.stringify({
+                type: 'USER_UPDATE',
+                data: {
+                    color: e.target.value,
+                },
+            })
+        )
+    }
 
     const handleMessages = (message: { userId: any; type: any; data: any }) => {
         const { userId, type, data } = message
@@ -50,7 +58,7 @@ function App() {
                     (user: { userId: string }) => data.userId === user.userId
                 )
                 setUsers(data.users)
-                setColor(user.color)
+                setUser(user)
                 if (canvasRef.current)
                     redrawCanvas(data.canvas, canvasRef.current)
                 break
@@ -82,6 +90,16 @@ function App() {
 
                 break
             }
+            case 'USER_UPDATE': {
+                // @ts-ignore
+                setUsers(
+                    // @ts-ignore
+                    users.map((user: object) =>
+                        // @ts-ignore
+                        user.userId === userId ? { ...user, ...data } : user
+                    )
+                )
+            }
         }
     }
 
@@ -96,9 +114,18 @@ function App() {
 
     return (
         <div className="App">
-            <Header users={users} sendMessage={sendMessage} />
+            <Header
+                users={users}
+                color={user.color}
+                sendMessage={sendMessage}
+                changeColor={changeColor}
+            />
             <section className="App-body">
-                <Canvas saveLine={saveLine} ref={canvasRef} color={color} />
+                <Canvas
+                    saveLine={saveLine}
+                    ref={canvasRef}
+                    color={user.color}
+                />
             </section>
         </div>
     )

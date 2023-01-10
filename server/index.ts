@@ -57,6 +57,18 @@ const handleActionMessages = (userId, message) => {
             sendMessageToAll({ type: 'RESET_CANVAS' })
             break
         }
+        case 'USER_UPDATE': {
+            clients[userId] = {
+                ...clients[userId],
+                ...data,
+            }
+            sendMessageToAll({
+                userId,
+                type,
+                data,
+            })
+            break
+        }
     }
 }
 
