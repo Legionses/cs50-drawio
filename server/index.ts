@@ -4,7 +4,7 @@ const http = require('http')
 const ws = require('ws')
 const { v4: uuidv4 } = require('uuid')
 const { SOCKET_ACTIONS, COLORS } = require('./utils/constants.ts')
-const { isJsonString } = require('./utils/data.ts')
+const { isJsonString, getName } = require('./utils/data.ts')
 
 const PORT = process.env.PORT || 3001
 
@@ -57,7 +57,10 @@ const handleActionMessages = (userId, message) => {
 
 wsServer.on('connection', (connection) => {
     const userId = uuidv4()
-    const userData = { color: COLORS[Math.floor(Math.random() * 7)] }
+    const userData = {
+        color: COLORS[Math.floor(Math.random() * 7)],
+        username: getName(Object.values(clients)),
+    }
     clients[userId] = { connection, ...userData }
     console.log('CONNECTED:', userId)
 

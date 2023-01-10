@@ -12,4 +12,19 @@ const COLORS = [
     '#c51459',
 ]
 
-module.exports = { SOCKET_ACTIONS, COLORS }
+const NAMES = [
+    'tinted Marmot',
+    'melodic Prawn',
+    'shocked Parakeet',
+    'feminine Peacock',
+    'strange Mule',
+    'lovable Leopon',
+    'educated Sea slug',
+    'acrobatic Quokka',
+    'zany Kingfisher',
+    'first Falcon',
+    'sorrowful Domestic guineafowl',
+    'immense Ferret',
+]
+
+module.exports = { SOCKET_ACTIONS, COLORS, NAMES }

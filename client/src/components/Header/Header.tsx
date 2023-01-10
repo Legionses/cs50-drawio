@@ -5,13 +5,15 @@ const Header = ({ users = [] }) => {
     return (
         <header className="App-header">
             <div className="users">
-                {users.map(({ userId, color }) => {
+                {users.map(({ userId, color, username }) => {
                     return (
                         <div
                             key={userId}
-                            className="users--item"
+                            className="users--item tooltip"
                             style={{ borderColor: color }}
-                        />
+                        >
+                            <div className="tooltiptext">{username}</div>
+                        </div>
                     )
                 })}
             </div>
