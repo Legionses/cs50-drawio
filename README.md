@@ -4,6 +4,8 @@
 #### Description: 
 The CS50-drawio is a online collaboration tool for sharing ideas or play mini-games on canvas with real-time interaction between users.
 
+Origin repo: https://github.com/Legionses/cs50-drawio
+
 #### How to start the project:
 The project consist of two folders, which are two parts:
 - The client;
