@@ -1,0 +1,12 @@
+{
+  "name": "cs50-drawio",
+  "version": "1.0.0",
+  "dependencies": {
+  },
+  "scripts": {
+    "install-project": "cd server && npm install && cd .. && cd client && npm install",
+    "start-client": " cd client && npm start",
+    "start-server": " cd server && npm start",
+    "start-project": "npm run start-server & npm run start-client"
+  }
+}

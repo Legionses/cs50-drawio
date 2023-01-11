@@ -27,6 +27,7 @@ const Header = ({
                 <button className="resetBtn" onClick={resetCanvas} />
                 <input ref={colorRef} type="color" onBlur={changeColor} />
             </div>
+            <h4>CS50-Drawio</h4>
             <div className="users">
                 {users.map(({ userId, color, username }) => {
                     return (
